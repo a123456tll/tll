@@ -1,7 +1,9 @@
-# tll — MCP 与 AnythingLLM 实践项目集
+# tll — LLM 应用实践合集
 
-一个围绕 [MCP](https://modelcontextprotocol.io)（Model Context Protocol）与
-[AnythingLLM](https://anythingllm.io) 的个人实验仓库，包含四个相互独立的小项目：
+个人 LLM 开发实践仓库，主题不再局限于 MCP：既包含基于
+[MCP](https://modelcontextprotocol.io)（Model Context Protocol）与
+[AnythingLLM](https://anythingllm.io) 的知识库与工具封装实验，也包含不依赖任何框架的
+Agent 流式对话入门练习，共四个相互独立的小项目：
 
 | 目录 | 说明 | 技术栈 |
 | --- | --- | --- |
