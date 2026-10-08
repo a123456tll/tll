@@ -29,7 +29,4 @@ query_result.txt
 .DS_Store
 Thumbs.db
 
-# Local-only folders
-Agent/
-
 config.ini
