@@ -1,18 +1,19 @@
 # tll — MCP 与 AnythingLLM 实践项目集
 
 一个围绕 [MCP](https://modelcontextprotocol.io)（Model Context Protocol）与
-[AnythingLLM](https://anythingllm.io) 的个人实验仓库，包含三个相互独立的小项目：
+[AnythingLLM](https://anythingllm.io) 的个人实验仓库，包含四个相互独立的小项目：
 
 | 目录 | 说明 | 技术栈 |
 | --- | --- | --- |
 | [`anythingllm-mcp/`](anythingllm-mcp/) | 把 AnythingLLM 工作区封装成 MCP 工具，供 opencode / 任意 MCP 客户端提问 | Python · MCP SDK 2.x · Streamable HTTP |
 | [`anthingllm-shangchuanwangye/`](anthingllm-shangchuanwangye/) | 单文件网页工具：上传文档到 AnythingLLM 并触发向量化嵌入 | 原生 HTML / JavaScript |
 | [`chongwuyiyuanmcp/pet-hospital-mcp/`](chongwuyiyuanmcp/pet-hospital-mcp/) | 把既有 Go 宠物医院 REST API 适配成无状态 MCP 服务 | Python · MCP SDK 2.x · Pydantic · pytest |
+| [`Agent/Practice01/`](Agent/Practice01/) | 最小流式对话练习：直接调用 OpenAI 兼容接口逐字输出回答 | Python · requests |
 
 > 目录名 `anthingllm-shangchuanwangye` 为历史遗留拼写（`shangchuanwangye` = 上传网页），
 > 为避免破坏既有链接予以保留。
 
-## 三个项目的关系
+## 各项目的关系
 
 ```text
                         ┌──────────────────────────────┐
@@ -43,10 +44,12 @@
   MCP 服务负责「把知识问出来」。
 - **pet-hospital-mcp** 与 AnythingLLM 无关，是另一条独立练习线：把已有 REST 后端
   无侵入地包装成 MCP 工具，**不修改 Go 后端任何代码**。
+- **Agent/Practice01** 同样与 MCP 无关，是最入门的一条线：绕开所有框架，
+  直接用 `requests` 流式调用 OpenAI 兼容接口，理解「请求 → SSE → 逐字输出」的最小闭环。
 
 ## 快速上手
 
-三个项目互相独立，按需选择其一安装。
+四个项目互相独立，按需选择其一安装。
 
 ### 1. anythingllm-mcp
 
@@ -123,6 +126,30 @@ npx @modelcontextprotocol/inspector
 与面向后续开发者的
 [`UPGRADE_PROMPT.md`](chongwuyiyuanmcp/pet-hospital-mcp/UPGRADE_PROMPT.md)。
 
+### 4. Agent/Practice01
+
+一个单文件命令行对话程序：读取本地 `config.ini`，流式请求 OpenAI 兼容接口，
+按 token 打印回答并保留多轮上下文。
+
+```powershell
+cd Agent/Practice01
+pip install requests
+
+# 复制下面的 config.ini 并填入你自己的 key（该文件已被 .gitignore 忽略，不会上传）
+python chat.py
+```
+
+`config.ini` 格式：
+
+```ini
+[llm]
+base_url = https://api.siliconflow.cn/v1
+api_key = <你的 API Key>
+model = Qwen/Qwen3-8B
+```
+
+启动后按提示输入问题，输入 `Ctrl+C` 结束程序。
+
 ## 环境依赖一览
 
 | 项目 | Python | 关键依赖 | 外部服务 |
@@ -130,15 +157,17 @@ npx @modelcontextprotocol/inspector
 | anythingllm-mcp | 3.11+ | `mcp[cli]>=2.0`、`httpx`、`uvicorn` | AnythingLLM（:3001） |
 | 上传网页 | 无（浏览器） | — | AnythingLLM（:50368） |
 | pet-hospital-mcp | 3.11+ | `mcp==2.0.0`、`httpx`、`pydantic` | Go 宠物医院 API（:8080） |
+| Agent/Practice01 | 3.8+ | `requests` | SiliconFlow 等 OpenAI 兼容 API |
 
 ## 安全说明
 
-- 仓库**不包含任何 API Key**。密钥一律通过环境变量（`anythingllm-mcp`）或
-  页面输入框（上传网页）提供。
-- `.env`、`.venv/`、`__pycache__/`、`*.egg-info/`、`*.log` 均已在 `.gitignore` 中排除。
-- 三个服务均**只监听 127.0.0.1**，属于本机教学/实验用途：
+- 仓库**不包含任何 API Key**。密钥一律通过环境变量（`anythingllm-mcp`）、
+  页面输入框（上传网页）或本地 `config.ini`（`Agent/Practice01`，已被忽略）提供。
+- `.env`、`.venv/`、`__pycache__/`、`*.egg-info/`、`*.log`、`config.ini`
+  均已在 `.gitignore` 中排除。
+- 前三个项目的本地服务均**只监听 127.0.0.1**，属于本机教学/实验用途：
   `pet-hospital-mcp` 明确不做认证、权限与 CORS / Origin 校验，
-  **请勿直接暴露到公网**。
+  **请勿直接暴露到公网**；`Agent/Practice01` 只作为出站客户端访问外部 API。
 - `pet-hospital-mcp` 的日志会对 `ownerPhone` / `ownerAddr` / `chipNo`
   （含 snake_case 写法）在任意嵌套层级递归脱敏。
 - 若你曾在本仓库的历史提交中放置过密钥，请立即在对应服务中**轮换（rotate）该密钥**——
